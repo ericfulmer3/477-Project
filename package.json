@@ -1,0 +1,15 @@
+{
+  "name": "cicd-credential-risk-framework",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "build": "node scripts/build.js",
+    "test": "node --test",
+    "check": "node --check src/app.js && node --check src/framework.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
