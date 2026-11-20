@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { DEFAULT_WEIGHTS, PRESETS } from "../src/framework.js";
-import { baselineDifference, classifyRisk, normalizeWeights, scoreAssessment, totalWeights, weightsAreValid } from "../src/scoring.js";
+import { baselineDifference, classifyRisk, normalizeWeights, recommendationsFor, scoreAssessment, totalWeights, weightsAreValid } from "../src/scoring.js";
 
 test("default weights total 100", () => assert.equal(totalWeights(DEFAULT_WEIGHTS), 100));
 
@@ -35,3 +35,9 @@ test("normalization produces exactly 100 percent", () => {
 });
 
 test("baseline difference reports 50 point reduction", () => assert.equal(baselineDifference(83, 33), 50));
+
+test("recommendations include only ratings 4–5 and sort by contribution", () => {
+  const recommendations = recommendationsFor(PRESETS.aws.ratings, DEFAULT_WEIGHTS);
+  assert.deepEqual(recommendations.map(({ id }) => id), ["privilege", "blastRadius", "exposure", "scope", "lifetime"]);
+  assert.ok(recommendations.every(({ points }, index) => index === 0 || recommendations[index - 1].points >= points));
+});
