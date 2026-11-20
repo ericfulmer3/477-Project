@@ -4,7 +4,7 @@ An interactive, presentation-ready academic tool for evaluating the risk of indi
 
 **Course:** CSCE 477 — Software/Tool Development Project<br>
 **GitHub:** <https://github.com/ericfulmer3/477-Project><br>
-**Public application:** Deployment pending; no public URL is available yet.
+**Public application:** TBD
 
 ## Team
 
@@ -96,17 +96,6 @@ Ratings: Privilege 5, Scope 5, Lifetime 5, Storage Security 3, Exposure Potentia
 This scenario represents a CI/CD workflow that obtains a short-lived, limited AWS credential through OIDC without storing a permanent cloud key. With default weights it scores **33 — Moderate**.
 
 Ratings: Privilege 2, Scope 2, Lifetime 1, Storage Security 1, Exposure Potential 2, Detectability 2, Revocability 1, Blast Radius 2.
-
-## Presentation workflow
-
-1. Select **Static AWS key**.
-2. Explain the **83 — Critical** score and the largest factor contributions.
-3. Select **Save as inherent-risk baseline**.
-4. Select **OIDC temporary** or adjust the sliders manually.
-5. Show the **33 — Moderate** residual-risk score.
-6. Explain the **50-point reduction** and why OIDC reduces but does not eliminate risk.
-7. Review the updated contribution chart and control recommendations.
-8. Optionally expand **Customize weights** to demonstrate validation, normalization, and organization-specific calibration.
 
 ## Technology and architecture
 
