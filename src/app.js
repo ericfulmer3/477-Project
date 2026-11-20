@@ -1,4 +1,5 @@
 import { DEFAULT_WEIGHTS, FACTORS } from "./framework.js";
+import { scoreAssessment } from "./scoring.js";
 
 const ratingLabels = ["", "Low", "Limited", "Moderate", "High", "Very high"];
 const state = {
@@ -10,10 +11,28 @@ const state = {
 
 const elements = {
   sliders: document.querySelector("#factorSliders"),
+  score: document.querySelector("#scoreCard"), chart: document.querySelector("#contributionChart"),
   name: document.querySelector("#credentialName"), type: document.querySelector("#credentialType"),
   system: document.querySelector("#credentialSystem"), environment: document.querySelector("#credentialEnvironment"),
   description: document.querySelector("#credentialDescription")
 };
+
+function formatPoints(value) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1);
+}
+
+function renderResults() {
+  const result = scoreAssessment(state.ratings, state.weights);
+  if (!result.valid) {
+    elements.score.innerHTML = `<p class="score-label">Weight total invalid</p><strong class="score-number">—</strong><p>Weights must total 100% to calculate a valid classification.</p>`;
+    elements.chart.innerHTML = "";
+    return;
+  }
+  const credential = state.details.name || "Current credential";
+  elements.score.className = `score-card risk-${result.classification.toLowerCase()}`;
+  elements.score.innerHTML = `<div class="score-top"><div><p class="score-label">Weighted risk score</p><h2>${credential}</h2></div><span class="risk-badge">${result.classification}</span></div><div class="score-value"><strong class="score-number">${formatPoints(result.score)}</strong><span>/ 100</span></div><div class="score-meter" aria-hidden="true"><i style="width:${result.score}%"></i></div><button id="saveBaseline" class="button baseline-button" type="button">Save as inherent-risk baseline</button><p class="minimum-note">Ratings start at 1; the practical minimum is 20.</p>`;
+  elements.chart.innerHTML = result.contributions.map((item) => `<div class="bar-row"><div class="bar-label"><span>${item.name}</span><strong>${formatPoints(item.points)}</strong></div><div class="bar-track" role="img" aria-label="${item.name}: ${formatPoints(item.points)} weighted points"><i style="width:${Math.min(100, item.points / 0.15)}%"></i></div></div>`).join("");
+}
 
 function renderSliders() {
   elements.sliders.innerHTML = FACTORS.map((factor, index) => {
@@ -35,6 +54,7 @@ elements.sliders.addEventListener("input", (event) => {
   if (!event.target.matches("input[type=range]")) return;
   state.ratings[event.target.dataset.factor] = Number(event.target.value);
   renderSliders();
+  renderResults();
 });
 
 elements.sliders.addEventListener("click", (event) => {
@@ -43,7 +63,8 @@ elements.sliders.addEventListener("click", (event) => {
   help.hidden = !help.hidden; button.setAttribute("aria-expanded", String(!help.hidden));
 });
 
-[[elements.name, "name"], [elements.type, "type"], [elements.system, "system"], [elements.environment, "environment"], [elements.description, "description"]].forEach(([element, key]) => element.addEventListener("input", () => { state.details[key] = element.value; }));
+[[elements.name, "name"], [elements.type, "type"], [elements.system, "system"], [elements.environment, "environment"], [elements.description, "description"]].forEach(([element, key]) => element.addEventListener("input", () => { state.details[key] = element.value; renderResults(); }));
 
 syncDetails();
 renderSliders();
+renderResults();
