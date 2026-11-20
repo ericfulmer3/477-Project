@@ -7,7 +7,7 @@
     "dev": "node scripts/dev-server.js",
     "build": "node scripts/build.js",
     "test": "node --test",
-    "check": "node --check src/app.js && node --check src/framework.js"
+    "check": "node --check src/app.js && node --check src/framework.js && node --check src/scoring.js && node --check src/assessment-state.js && node --check src/rendering.js"
   },
   "engines": {
     "node": ">=20"
