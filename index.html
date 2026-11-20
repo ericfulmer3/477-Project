@@ -3,15 +3,62 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Interactive academic framework for assessing CI/CD and cloud credential risk." />
-    <title>Credential Risk Framework</title>
+    <meta name="description" content="Interactive academic framework for assessing CI/CD and cloud machine credential risk." />
+    <meta name="theme-color" content="#233a44" />
+    <title>CI/CD Credential Risk Framework</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&amp;family=Source+Sans+3:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <main id="app">
-      <h1>CI/CD &amp; Cloud Credential Risk Assessment</h1>
-      <p>Application scaffold</p>
+    <header class="hero">
+      <nav class="topbar" aria-label="Page navigation">
+        <a class="brand" href="#top" aria-label="Credential risk framework home"><span class="brand-mark" aria-hidden="true">CR</span><span>Credential Risk<br /><small>Assessment Framework</small></span></a>
+        <div class="top-actions"><button class="button ghost" id="resetButton" type="button">Reset assessment</button><a class="button copper" href="#assessment">Start assessing</a></div>
+      </nav>
+      <div class="hero-content" id="top">
+        <p class="eyebrow">Interactive academic demonstration</p>
+        <h1>Make machine-credential risk <span>visible.</span></h1>
+        <p class="lede">This framework scores each machine credential individually, identifies what makes it risky, and shows how targeted security controls can reduce that risk.</p>
+        <div class="hero-meta"><span><strong>8</strong> risk factors</span><span><strong>100</strong> weighted points</span><span><strong>1</strong> credential at a time</span></div>
+      </div>
+    </header>
+
+    <main id="assessment" class="workspace">
+      <section class="intro-row" aria-labelledby="assessmentTitle">
+        <div><p class="section-kicker">Credential assessment</p><h2 id="assessmentTitle">Describe one credential, then rate its risk.</h2></div>
+        <div class="presets" aria-label="Demonstration scenarios"><span>Load a scenario</span><button class="button preset" data-preset="aws" type="button">Static AWS key</button><button class="button preset" data-preset="oidc" type="button">OIDC temporary</button></div>
+      </section>
+
+      <section class="credential-fields" aria-label="Credential details">
+        <label>Credential name<input id="credentialName" autocomplete="off" placeholder="e.g., Production deploy key" /></label>
+        <label>Credential type<select id="credentialType"><option>AWS access key</option><option>GitHub Actions token</option><option>API key</option><option>Service account</option><option>npm publishing token</option><option>Temporary OIDC credential</option><option>Other</option></select></label>
+        <label>System or pipeline<input id="credentialSystem" autocomplete="off" placeholder="e.g., Release workflow" /></label>
+        <label>Environment<select id="credentialEnvironment"><option>Development</option><option>Testing</option><option>Staging</option><option selected>Production</option></select></label>
+        <label class="wide">Business case <span>(optional)</span><textarea id="credentialDescription" rows="2" placeholder="What is this credential used for?"></textarea></label>
+      </section>
+
+      <div class="assessment-grid">
+        <section class="factors-panel" aria-labelledby="factorsTitle">
+          <div class="panel-heading"><div><p class="section-kicker">Risk inputs</p><h2 id="factorsTitle">Rate each factor</h2></div><div class="scale-key"><span>1 · Low</span><span>5 · Very high</span></div></div>
+          <div id="factorSliders" class="factor-list"></div>
+        </section>
+        <aside class="results-panel" aria-live="polite">
+          <div id="scoreCard" class="score-card"></div>
+          <div id="baselineComparison" class="baseline-comparison"></div>
+          <div class="result-section"><div class="result-heading"><h3>Risk contribution</h3><span>Weighted points</span></div><div id="contributionChart" class="contribution-chart"></div></div>
+          <div class="result-section recommendations"><div class="result-heading"><h3>Priority controls</h3><span id="recommendationCount"></span></div><div id="recommendations"></div></div>
+        </aside>
+      </div>
+
+      <details class="weights-panel">
+        <summary><span><strong>Customize weights</strong><small>Organization-specific calibration</small></span><span class="weight-status" id="weightStatus"></span></summary>
+        <div class="weights-body"><p>These custom weights are organization-specific, not validated industry standards. Establish weights before scoring credentials and apply them consistently.</p><div id="weightInputs" class="weight-inputs"></div><div class="weight-actions"><button class="button ghost-dark" id="restoreWeights" type="button">Restore defaults</button><button class="button copper" id="normalizeWeights" type="button">Normalize to 100%</button></div></div>
+      </details>
     </main>
+
+    <footer><p>This application demonstrates a proposed academic risk-assessment framework. The default weights and thresholds are illustrative and should be validated before operational use.</p><p>CSCE 477 · Software/Tool Development Project</p></footer>
     <script type="module" src="/src/app.js"></script>
   </body>
 </html>
