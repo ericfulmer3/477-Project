@@ -1,5 +1,5 @@
-import { DEFAULT_WEIGHTS, FACTORS } from "./framework.js";
-import { baselineDifference, recommendationsFor, scoreAssessment } from "./scoring.js";
+import { DEFAULT_WEIGHTS, FACTORS, PRESETS } from "./framework.js";
+import { baselineDifference, normalizeWeights, recommendationsFor, restoreDefaultWeights, scoreAssessment, totalWeights, weightsAreValid } from "./scoring.js";
 
 const ratingLabels = ["", "Low", "Limited", "Moderate", "High", "Very high"];
 const state = {
@@ -14,6 +14,7 @@ const elements = {
   score: document.querySelector("#scoreCard"), chart: document.querySelector("#contributionChart"),
   comparison: document.querySelector("#baselineComparison"), recommendations: document.querySelector("#recommendations"),
   recommendationCount: document.querySelector("#recommendationCount"),
+  weightInputs: document.querySelector("#weightInputs"), weightStatus: document.querySelector("#weightStatus"),
   name: document.querySelector("#credentialName"), type: document.querySelector("#credentialType"),
   system: document.querySelector("#credentialSystem"), environment: document.querySelector("#credentialEnvironment"),
   description: document.querySelector("#credentialDescription")
@@ -32,11 +33,37 @@ function renderComparison(result) {
     elements.comparison.innerHTML = `<p><strong>No baseline saved yet.</strong> Save the current assessment, then change the ratings to compare residual risk.</p>`;
     return;
   }
+  const sameWeights = FACTORS.every(({ id }) => state.baseline.weights[id] === state.weights[id]);
+  if (!sameWeights) {
+    elements.comparison.innerHTML = `<p><strong>Baseline comparison paused.</strong> The baseline uses different weights. Restore those weights or save a new baseline before comparing risk.</p>`;
+    return;
+  }
   const difference = baselineDifference(state.baseline.score, result.score);
   const improved = difference > 0;
   const unchanged = difference === 0;
   const changeLabel = unchanged ? "No change" : `${formatPoints(Math.abs(difference))}-point ${improved ? "reduction" : "increase"}`;
   elements.comparison.innerHTML = `<div class="comparison-heading"><div><p class="score-label">Inherent → residual risk</p><h3>${escapeHtml(state.baseline.name)}</h3></div><strong class="change ${improved ? "improved" : difference < 0 ? "increased" : ""}">${changeLabel}</strong></div><div class="comparison-values"><span><b>${formatPoints(state.baseline.score)}</b> ${state.baseline.classification}</span><i aria-hidden="true"></i><span><b>${formatPoints(result.score)}</b> ${result.classification}</span></div>${improved ? `<p class="residual-note">Controls reduced risk, but residual risk remains and still requires oversight.</p>` : ""}`;
+}
+
+function updateWeightStatus() {
+  const total = totalWeights(state.weights);
+  const valid = weightsAreValid(state.weights);
+  elements.weightStatus.className = `weight-status ${valid ? "valid" : "invalid"}`;
+  elements.weightStatus.textContent = `${formatPoints(total)}% total · ${valid ? "Valid" : "Must equal 100%"}`;
+}
+
+function renderWeightInputs() {
+  elements.weightInputs.innerHTML = FACTORS.map((factor) => `<label for="weight-${factor.id}"><span>${factor.name}</span><span class="weight-field"><input id="weight-${factor.id}" data-weight="${factor.id}" type="number" min="0" max="100" step="0.1" value="${state.weights[factor.id]}" aria-label="${factor.name} weight percentage" /><b>%</b></span></label>`).join("");
+  updateWeightStatus();
+}
+
+function applyPreset(key) {
+  const preset = PRESETS[key];
+  state.details = { ...preset.details, description: preset.description };
+  state.ratings = { ...preset.ratings };
+  syncDetails();
+  renderSliders();
+  renderResults();
 }
 
 function renderRecommendations() {
@@ -108,8 +135,41 @@ elements.score.addEventListener("click", (event) => {
   renderResults();
 });
 
+document.querySelectorAll("[data-preset]").forEach((button) => button.addEventListener("click", () => applyPreset(button.dataset.preset)));
+
+elements.weightInputs.addEventListener("input", (event) => {
+  if (!event.target.matches("[data-weight]")) return;
+  state.weights[event.target.dataset.weight] = Number(event.target.value);
+  updateWeightStatus();
+  renderResults();
+});
+
+document.querySelector("#restoreWeights").addEventListener("click", () => {
+  state.weights = restoreDefaultWeights();
+  renderWeightInputs();
+  renderResults();
+});
+
+document.querySelector("#normalizeWeights").addEventListener("click", () => {
+  state.weights = normalizeWeights(state.weights);
+  renderWeightInputs();
+  renderResults();
+});
+
+document.querySelector("#resetButton").addEventListener("click", () => {
+  state.details = { name: "", type: "AWS access key", system: "", environment: "Production", description: "" };
+  state.ratings = Object.fromEntries(FACTORS.map(({ id }) => [id, 3]));
+  state.weights = restoreDefaultWeights();
+  state.baseline = null;
+  syncDetails();
+  renderSliders();
+  renderWeightInputs();
+  renderResults();
+});
+
 [[elements.name, "name"], [elements.type, "type"], [elements.system, "system"], [elements.environment, "environment"], [elements.description, "description"]].forEach(([element, key]) => element.addEventListener("input", () => { state.details[key] = element.value; renderResults(); }));
 
 syncDetails();
 renderSliders();
+renderWeightInputs();
 renderResults();

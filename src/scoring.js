@@ -10,12 +10,19 @@ export function weightsAreValid(weights) {
 
 export function normalizeWeights(weights) {
   const total = totalWeights(weights);
-  if (total <= 0) return Object.fromEntries(Object.keys(weights).map((key) => [key, 0]));
+  if (total <= 0) {
+    const equalWeight = 100 / Object.keys(weights).length;
+    return Object.fromEntries(Object.keys(weights).map((key) => [key, equalWeight]));
+  }
   const entries = Object.entries(weights);
   const normalized = Object.fromEntries(entries.map(([key, value]) => [key, Math.round((Number(value) / total) * 1000) / 10]));
   const drift = Math.round((100 - totalWeights(normalized)) * 10) / 10;
   if (drift) normalized[entries.at(-1)[0]] = Math.round((normalized[entries.at(-1)[0]] + drift) * 10) / 10;
   return normalized;
+}
+
+export function restoreDefaultWeights() {
+  return Object.fromEntries(FACTORS.map(({ id, weight }) => [id, weight]));
 }
 
 export function classifyRisk(score) {
