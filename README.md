@@ -2,9 +2,9 @@
 
 An interactive, presentation-ready academic tool for evaluating the risk of individual machine credentials used in CI/CD and cloud workflows.
 
-**Course:** CSCE 477 — Software/Tool Development Project<br>
+**Course:** CSCE 477<br>
 **GitHub:** <https://github.com/ericfulmer3/477-Project><br>
-**Public application:** TBD
+**Public application:** https://credential-risk-framework.pages.dev/
 
 ## Team
 
